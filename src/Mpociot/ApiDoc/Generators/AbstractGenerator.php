@@ -74,11 +74,13 @@ abstract class AbstractGenerator
      * @param array $routeData
      * @param array $routeAction
      * @param array $bindings
+     * @param array $routeDescription Contains description and tags from docblock
      *
      * @return mixed
      */
-    protected function getParameters($routeData, $routeAction, $bindings)
+    protected function getParameters($routeData, $routeAction, $bindings, $routeDescription)
     {
+        // First try to get the form request
         $validator = Validator::make([], $this->getRouteRules($routeAction['uses'], $bindings));
         foreach ($validator->getRules() as $attribute => $rules) {
             $attributeData = [
@@ -92,6 +94,38 @@ abstract class AbstractGenerator
                 $this->parseRule($rule, $attribute, $attributeData, $routeData['id']);
             }
             $routeData['parameters'][$attribute] = $attributeData;
+        }
+
+        $paramsTypeWhiteList = ['number', 'numeric', 'string', 'array'];
+
+        /**
+         * Parsers the tags with query param documentation
+         * @type Tag\ParamTag $tag
+         */
+        foreach ($routeDescription['tags'] as $tag) {
+            // Support only param tags
+            if (($tag instanceof Tag\ParamTag) === false) {
+                continue;
+            }
+            // Allow only allowed types
+            if (in_array($tag->getType(), $paramsTypeWhiteList) === false) {
+                continue;
+            }
+
+            // Check if the description contains required statement
+            $required = preg_match('/required/', $tag->getDescription());
+
+            $attribute = Str::snake(str_replace('$', '', $tag->getVariableName()));
+            $routeData['query'][$attribute] = [
+                'required' => $required,
+                'type' => $tag->getType(),
+                'default' => '',
+                'value' => '',
+                'description' => [
+                    // Replace any (required) text
+                    trim(str_replace('(required)', '', $tag->getDescription()))
+                ],
+            ];
         }
 
         return $routeData;

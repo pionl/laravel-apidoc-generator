@@ -37,8 +37,9 @@ class DingoGenerator extends AbstractGenerator
             'methods' => $route->getMethods(),
             'uri' => $route->uri(),
             'parameters' => [],
-            'response' => $response,
-        ], $routeAction, $bindings);
+            'response' => $response,,
+            'query' => []
+        ], $routeAction, $bindings, $routeDescription);
     }
 
     /**

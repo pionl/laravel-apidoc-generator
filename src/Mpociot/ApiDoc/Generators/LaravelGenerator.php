@@ -95,7 +95,8 @@ class LaravelGenerator extends AbstractGenerator
             'parameters' => [],
             'response' => $content,
             'showresponse' => $showresponse,
-        ], $routeAction, $bindings);
+            'query' => []
+        ], $routeAction, $bindings, $routeDescription);
     }
 
     /**

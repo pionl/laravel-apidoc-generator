@@ -55,6 +55,17 @@ $.ajax(settings).done(function (response) {
 `{{$method}} {{$parsedRoute['uri']}}`
 
 @endforeach
+
+@if(count($parsedRoute['query']))
+#### Query Parameters
+
+Parameter | Type | Status | Description
+--------- | ------- | ------- | ------- | -----------
+@foreach($parsedRoute['query'] as $attribute => $parameter)
+    {{$attribute}} | {{$parameter['type']}} | @if($parameter['required']) required @else optional @endif | {!! implode(' ',$parameter['description']) !!}
+@endforeach
+@endif
+
 @if(count($parsedRoute['parameters']))
 #### Parameters
 
